@@ -287,13 +287,14 @@
         // --- Screen 5: Home (Landing) ---
         const HomePage = () => {
             const { lang, toggleLang } = useContext(LanguageContext);
+            const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
             const t = {
                 es: {
                     target: "OBJETIVO",
                     programs: "PROGRAMAS",
                     pricing: "INVERSIÓN",
                     mentors: "MENTORES",
-                    access: "ACCESO ALUMNOS",
+                    access: "INSCRIBIRME",
                     header_h1_1: "EL SISTEMA DE LOS",
                     header_h1_2: "RESTAURANTES",
                     header_h1_3: "QUE",
@@ -319,7 +320,7 @@
                     programs: "PROGRAMS",
                     pricing: "PRICING",
                     mentors: "MENTORS",
-                    access: "STUDENT ACCESS",
+                    access: "REGISTER",
                     header_h1_1: "THE SYSTEM FOR",
                     header_h1_2: "RESTAURANTS",
                     header_h1_3: "THAT",
@@ -372,13 +373,34 @@
                                     <button onClick={toggleLang} className="text-sm font-bold text-gray-600 dark:text-gray-300 hover:text-primary">
                                         {lang === 'es' ? 'EN' : 'ES'}
                                     </button>
-                                    <button className="text-gray-600 dark:text-gray-300 hover:text-primary focus:outline-none">
+                                    <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-gray-600 dark:text-gray-300 hover:text-primary focus:outline-none">
                                         <span className="material-icons-outlined text-3xl">menu</span>
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </nav>
+
+                    {/* Mobile Menu Overlay */}
+                    <div className={`fixed inset-0 z-50 bg-background-dark/95 backdrop-blur-xl transition-transform duration-300 lg:hidden flex flex-col items-center justify-center space-y-8 ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+                        <button onClick={() => setIsMobileMenuOpen(false)} className="absolute top-6 right-6 text-white hover:text-primary transition-colors">
+                            <span className="material-icons-outlined text-4xl">close</span>
+                        </button>
+
+                        <a href="#target" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-bold text-white hover:text-primary transition-colors">{content.target}</a>
+                        <a href="#program" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-bold text-white hover:text-primary transition-colors">{content.programs}</a>
+                        <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-bold text-white hover:text-primary transition-colors">{content.pricing}</a>
+                        <a href="#mentors" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-bold text-white hover:text-primary transition-colors">{content.mentors}</a>
+
+                        <div className="pt-8 flex flex-col items-center gap-6">
+                            <button onClick={toggleLang} className="text-lg font-bold text-gray-400 hover:text-white transition-colors">
+                                {lang === 'es' ? 'Cambiar a Inglés' : 'Switch to Spanish'}
+                            </button>
+                            <a className="px-8 py-3 rounded-full bg-primary text-white font-bold text-lg hover:bg-primary-dark transition-colors shadow-lg shadow-primary/25" href="#">
+                                {content.access}
+                            </a>
+                        </div>
+                    </div>
 
                     <header className="relative min-h-screen flex items-center justify-center overflow-hidden">
                         <div className="absolute inset-0 z-0">
@@ -542,7 +564,7 @@
                                         <div className="flex items-start gap-3 sm:gap-4 group">
                                             <span className="text-xl sm:text-2xl select-none group-hover:scale-110 transition-transform duration-300">👉</span>
                                             <p className="text-slate-400 group-hover:text-slate-200 text-base sm:text-lg font-normal leading-relaxed transition-colors duration-300">
-                                                {content.myth3} <span class="italic text-white">{content.myth3_hl}</span>
+                                                {content.myth3} <span className="italic text-white">{content.myth3_hl}</span>
                                             </p>
                                         </div>
                                     </div>
