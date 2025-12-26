@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>UADEN Prime - Sistema de Gestión Gastronómica</title>
+
+    <!-- Tailwind CSS (via CDN) -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries,typography"></script>
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ef4537",
+                        "primary-dark": "#c43226", // Darker shade for hover states
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                        "surface-dark": "#1c2333",
+                        "surface-darker": "#151b29",
+                        "brand-dark": "#002b49",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "DM Sans", "Manrope", "sans-serif"],
+                        "sans": ["Lexend", "DM Sans", "Manrope", "sans-serif"],
+                        "body": ["Lexend", "DM Sans", "Manrope", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.375rem", // rounded-md
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    keyframes: {
+                        shine: {
+                            "100%": { left: "125%" },
+                        },
+                        fadeIn: {
+                            from: { opacity: 0, transform: 'translateY(20px)' },
+                            to: { opacity: 1, transform: 'translateY(0)' }
+                        },
+                        gradient: {
+                            '0%': { backgroundPosition: '0% 50%' },
+                            '50%': { backgroundPosition: '100% 50%' },
+                            '100%': { backgroundPosition: '0% 50%' }
+                        }
+                    },
+                    animation: {
+                        shine: "shine 1s",
+                        fadeIn: "fadeIn 1s ease-out forwards",
+                        gradient: "gradient 3s linear infinite",
+                    },
+                },
+            },
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Manrope:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+
+    <!-- Material Icons & Symbols -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+
+    <!-- React Dependencies -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/history@5/umd/history.development.js"></script>
+    <script src="https://unpkg.com/react-router@6.3.0/umd/react-router.development.js"></script>
+    <script src="https://unpkg.com/react-router-dom@6.3.0/umd/react-router-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <!-- N8N Chatbot Styles (Customized) -->
+    <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+
+    <style>
+        /* Shared Styles */
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24
+        }
+
+        .glow-accent {
+            box-shadow: 0 0 60px -10px rgba(239, 69, 55, 0.15);
+        }
+
+        .moody-glow {
+            background: radial-gradient(circle at center, rgba(239, 69, 55, 0.15) 0%, rgba(16, 22, 34, 0) 70%);
+        }
+
+        .skew-slash {
+            transform: skew(-15deg);
+        }
+
+        /* Navigation Styles */
+        .app-nav {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(16, 22, 34, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+            padding: 0.5rem 1rem;
+            display: flex;
+            gap: 1.5rem;
+            z-index: 9999;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        .app-nav a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: color 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .app-nav a:hover,
+        .app-nav a.active {
+            color: #ef4537;
+        }
+
+        .app-nav a span {
+            font-size: 1.25rem;
+            margin-bottom: 2px;
+        }
+
+        /* N8N Chatbot Customization Overrides */
+        :root {
+            --chat--color-primary: #ef4537;
+            --chat--color-primary-shade-50: #c43226;
+            --chat--color-primary-shade-100: #c43226;
+            --chat--color-secondary: #1c2333;
+            --chat--color-secondary-shade-50: #151b29;
+            --chat--color-white: #ffffff;
+            --chat--color-light: #f6f6f8;
+            --chat--color-light-shade-50: #e2e8f0;
+            --chat--color-medium: #94a3b8;
+            --chat--color-dark: #101622;
+            --chat--font-family: 'Lexend', 'DM Sans', 'Manrope', sans-serif;
+            --chat--border-radius: 0.5rem;
+            --chat--window--width: 400px;
+            --chat--window--height: 600px;
+            --chat--header--background: #101622;
+            --chat--header--color: #ffffff;
+            --chat--toggle--background: #ef4537;
+            --chat--toggle--hover--background: #c43226;
+            --chat--message--bot--background: #1c2333;
+            --chat--message--bot--color: #ffffff;
+            --chat--message--user--background: #ef4537;
+            --chat--message--user--color: #ffffff;
+            --chat--input--background: #151b29;
+            --chat--input--color: #ffffff;
+            --chat--input--border: 1px solid #3b4354;
+        }
+
+        /* Override specific chat elements for better dark mode integration */
+        .n8n-chat .chat-window {
+            border: 1px solid #3b4354;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        .n8n-chat .chat-input-container {
+            background: #101622;
+            border-top: 1px solid #1c2333;
+        }
+
+        .n8n-chat .chat-input {
+            background-color: #1c2333 !important;
+            color: white !important;
+            border: 1px solid #3b4354 !important;
+        }
+
+        .n8n-chat .chat-input::placeholder {
+            color: #94a3b8 !important;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white antialiased selection:bg-primary selection:text-white">
+    <div id="root"></div>
+
+    <script type="module">
+        import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.js';
+
+        // Initialize n8n Chatbot with specific theming
+        createChat({
+            webhookUrl: 'YOUR_N8N_WEBHOOK_URL_HERE', // REPLACE THIS WITH YOUR ACTUAL N8N WEBHOOK URL
+            webhookConfig: {
+                method: 'POST',
+                headers: {}
+            },
+            target: '#n8n-chat',
+            mode: 'window',
+            chatInput: {
+                method: 'POST',
+                headers: {}
+            },
+            showWelcomeScreen: true,
+            defaultLanguage: 'es',
+            initialMessages: [
+                '¡Hola! 👋',
+                'Soy el asistente virtual de UADEN Prime. ¿En qué puedo ayudarte hoy sobre nuestros programas de gestión gastronómica?'
+            ],
+            i18n: {
+                es: {
+                    title: 'Asistente UADEN',
+                    subtitle: 'Soporte 24/7',
+                    footer: '',
+                    getStarted: 'Comenzar chat',
+                    inputPlaceholder: 'Escribe tu pregunta...',
+                },
+                en: {
+                    title: 'UADEN Assistant',
+                    subtitle: '24/7 Support',
+                    footer: '',
+                    getStarted: 'Start chat',
+                    inputPlaceholder: 'Type your question...',
+                },
+            },
+            style: {
+                width: 400,
+                height: 600,
+                position: 'right',
+                backgroundColor: '#101622',
+                borderRadius: '8px',
+            }
+        });
+    </script>
+
+    <script type="text/babel">
+        const { useState, useEffect, useContext, createContext } = React;
+        const { createRoot } = ReactDOM;
+        const { MemoryRouter, Routes, Route, Link, useNavigate, useLocation } = ReactRouterDOM;
+
+        const LanguageContext = createContext();
+
+        // --- Navigation Component ---
+        const scrollToSection = (id) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        };
+
+        const Navigation = () => {
+            const { lang } = useContext(LanguageContext);
+            const links = [
+                { id: "home", icon: "home", label: lang === 'es' ? "Inicio" : "Home" },
+                { id: "revelation", icon: "visibility", label: lang === 'es' ? "Revelación" : "Revelation" },
+                { id: "target", icon: "target", label: lang === 'es' ? "Objetivo" : "Target" },
+                { id: "program", icon: "school", label: lang === 'es' ? "Programa" : "Program" },
+                { id: "pricing", icon: "payments", label: lang === 'es' ? "Inversión" : "Pricing" },
+                { id: "mentors", icon: "groups", label: lang === 'es' ? "Mentores" : "Mentors" },
+            ];
+
+            return (
+                <nav className="app-nav">
+                    {links.map((link) => (
+                        <a
+                            key={link.id}
+                            href={`#${link.id}`}
+                            onClick={(e) => { e.preventDefault(); scrollToSection(link.id); }}
+                            className="cursor-pointer hover:text-primary transition-colors"
+                        >
+                            <span className="material-symbols-outlined">{link.icon}</span>
+                        </a>
+                    ))}
+                </nav>
+            );
+        };
+
+        // --- Screen 5: Home (Landing) ---
+        const HomePage = () => {
+            const { lang, toggleLang } = useContext(LanguageContext);
+            const t = {
+                es: {
+                    target: "OBJETIVO",
+                    programs: "PROGRAMAS",
+                    pricing: "INVERSIÓN",
+                    mentors: "MENTORES",
+                    access: "ACCESO ALUMNOS",
+                    header_h1_1: "EL SISTEMA DE LOS",
+                    header_h1_2: "RESTAURANTES",
+                    header_h1_3: "QUE",
+                    header_h1_4: "SÍ GANAN",
+                    header_sub: "Por qué algunos prosperan y otros apenas sobreviven…",
+                    header_sub_2: "(y cómo pasar, definitivamente, al primer grupo)",
+                    cta_primary: "QUIERO CONOCER EL SISTEMA",
+                    cta_video: "Ver Video Introductorio",
+                    stats_1_l: "Restaurantes Transformados",
+                    stats_2_l: "Metodología Práctica",
+                    stats_3_l: "Educación Elite",
+                    stats_4_l: "Certificación Internacional",
+                    pain_title_1: "La verdad",
+                    pain_title_2: "incómoda",
+                    pain_title_3: "que nadie dice en la gastronomía",
+                    pain_p1: "Tienes talento, pasión y un equipo que se esfuerza... pero los números no cierran.",
+                    pain_p2: "No es tu culpa. La industria gastronómica te vende un sueño y te esconde la verdad: que ser dueño es un laberinto sin salida aparente, donde el éxito parece cuestión de suerte.",
+                    pain_p3: "Horas infinitas, márgenes exiguos, empleados que no duran y un estrés que consume. Sientes que has probado de todo, pero la rueda sigue girando y tu negocio, aunque no lo digas en voz alta,",
+                    pain_p3_strong: "está estancado o, peor aún, retrocediendo."
+                },
+                en: {
+                    target: "TARGET",
+                    programs: "PROGRAMS",
+                    pricing: "PRICING",
+                    mentors: "MENTORS",
+                    access: "STUDENT ACCESS",
+                    header_h1_1: "THE SYSTEM FOR",
+                    header_h1_2: "RESTAURANTS",
+                    header_h1_3: "THAT",
+                    header_h1_4: "TRULY WIN",
+                    header_sub: "Why some prosper while others barely survive...",
+                    header_sub_2: "(and how to definitely move to the winning side)",
+                    cta_primary: "DISCOVER THE SYSTEM",
+                    cta_video: "Watch Intro Video",
+                    stats_1_l: "Transformed Restaurants",
+                    stats_2_l: "Practical Methodology",
+                    stats_3_l: "Elite Education",
+                    stats_4_l: "International Certification",
+                    pain_title_1: "The uncomfortable",
+                    pain_title_2: "truth",
+                    pain_title_3: "no one tells you in gastronomy",
+                    pain_p1: "You have talent, passion, and a hardworking team... but the numbers just don't add up.",
+                    pain_p2: "It's not your fault. The restaurant industry sells you a dream while hiding the truth: being an owner is a maze with no apparent exit, where success feels like luck.",
+                    pain_p3: "Endless hours, thin margins, high turnover, and consuming stress. You feel you've tried everything, but the wheel keeps spinning and your business, even if you won't say it aloud,",
+                    pain_p3_strong: "is stagnant or, worse yet, declining."
+                }
+            };
+
+            const content = t[lang];
+
+            return (
+                <div className="min-h-screen relative overflow-hidden transition-colors duration-300">
+                    <nav className="fixed w-full z-40 top-0 transition-all duration-300 bg-white/90 dark:bg-background-dark/90 backdrop-blur-md border-b border-gray-200 dark:border-blue-900/30">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between items-center h-20">
+                                <div className="flex-shrink-0 flex items-center">
+                                    <img src="assets/logo-uadenprime.png" alt="UADEN Prime" className="h-12 w-auto object-contain" />
+                                </div>
+                                <div className="hidden md:flex items-center space-x-6">
+                                    <button onClick={() => scrollToSection('target')} className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors">{content.target}</button>
+                                    <button onClick={() => scrollToSection('program')} className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors">{content.programs}</button>
+                                    <button onClick={() => scrollToSection('pricing')} className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors">{content.pricing}</button>
+                                    <button onClick={() => scrollToSection('mentors')} className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors">{content.mentors}</button>
+
+                                    <button onClick={toggleLang} className="flex items-center space-x-1 px-3 py-1.5 rounded-full bg-surface-dark border border-gray-700 text-xs font-bold transition-colors cursor-pointer">
+                                        <span className={lang === 'es' ? 'text-primary' : 'text-gray-500'}>ES</span>
+                                        <span className="text-gray-600">|</span>
+                                        <span className={lang === 'en' ? 'text-primary' : 'text-gray-500'}>EN</span>
+                                    </button>
+
+                                    <a className="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-sm shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all" href="#">
+                                        {content.access}
+                                    </a>
+                                </div>
+                                <div className="md:hidden flex items-center gap-4">
+                                    <button onClick={toggleLang} className="text-sm font-bold text-gray-600 dark:text-gray-300 hover:text-primary">
+                                        {lang === 'es' ? 'EN' : 'ES'}
+                                    </button>
+                                    <button className="text-gray-600 dark:text-gray-300 hover:text-primary focus:outline-none">
+                                        <span className="material-icons-outlined text-3xl">menu</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <header className="relative min-h-screen flex items-center justify-center overflow-hidden">
+                        <div className="absolute inset-0 z-0">
+                            <img alt="Restaurant Interior Ambience" className="w-full h-full object-cover" src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop" />
+                            <div className="absolute inset-0 bg-white/90 dark:bg-[#010c4e]/95 mix-blend-hard-light dark:mix-blend-normal"></div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#010c4e] via-transparent to-transparent opacity-90 hidden dark:block"></div>
+                        </div>
+                        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl z-0 pointer-events-none"></div>
+                        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl z-0 pointer-events-none"></div>
+
+                        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center justify-center h-full pt-20">
+                            <div className="inline-flex items-center space-x-2 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 rounded-full px-4 py-1.5 mb-8 animate-fade-in-up">
+                                <span className="flex h-2 w-2 relative">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                                </span>
+                                <span className="text-xs font-bold tracking-widest text-brand-dark dark:text-blue-200 uppercase">An Elite Quality Education</span>
+                            </div>
+                            <div className="relative mb-6 group">
+                                <div className="absolute -left-6 top-0 bottom-0 w-2 bg-primary skew-slash opacity-0 md:opacity-100 transform origin-bottom transition-transform duration-700 scale-y-0 group-hover:scale-y-100"></div>
+                                <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.1]">
+                                    {content.header_h1_1} <br className="hidden md:block" />
+                                    <span className="relative inline-block mx-2 md:mx-0">
+                                        {content.header_h1_2}
+                                        <svg className="absolute w-full h-3 -bottom-1 left-0 text-primary opacity-80" fill="none" viewBox="0 0 200 9" xmlns="http://www.w3.org/2000/svg"><path d="M2.00025 6.99997C2.00025 6.99997 187.5 1.49997 259 1.49997" stroke="currentColor" strokeLinecap="round" strokeWidth="3"></path></svg>
+                                    </span>
+                                    {content.header_h1_3} <span className="text-primary">{content.header_h1_4}</span>
+                                </h1>
+                            </div>
+                            <h2 className="text-lg md:text-2xl font-normal text-slate-600 dark:text-gray-300 max-w-3xl mx-auto mb-10 leading-relaxed">
+                                {content.header_sub} <br className="hidden md:block" />
+                                <span className="font-medium italic text-slate-800 dark:text-white">{content.header_sub_2}</span>
+                            </h2>
+                            <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
+                                <button onClick={() => scrollToSection('revelation')} className="group relative px-8 py-5 bg-primary text-white text-lg font-bold tracking-wide rounded shadow-xl hover:shadow-2xl hover:bg-primary-dark transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
+                                    <span className="relative z-10 flex items-center">
+                                        {content.cta_primary}
+                                        <span className="material-icons-outlined ml-2 group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                                    </span>
+                                    <div className="absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-20 group-hover:animate-shine"></div>
+                                </button>
+                                <button className="flex items-center space-x-2 text-slate-700 dark:text-gray-300 font-semibold hover:text-primary dark:hover:text-white transition-colors">
+                                    <span className="flex items-center justify-center w-10 h-10 rounded-full border-2 border-slate-300 dark:border-gray-600">
+                                        <span className="material-icons-outlined text-xl">play_arrow</span>
+                                    </span>
+                                    <span>{content.cta_video}</span>
+                                </button>
+                            </div>
+                            <div className="mt-20 pt-8 border-t border-gray-200/50 dark:border-white/10 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 w-full max-w-5xl">
+                                <div className="text-center">
+                                    <p className="text-3xl font-bold text-slate-900 dark:text-white">+500</p>
+                                    <p className="text-xs uppercase tracking-wider text-slate-500 dark:text-gray-400 mt-1">{content.stats_1_l}</p>
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-3xl font-bold text-slate-900 dark:text-white">100%</p>
+                                    <p className="text-xs uppercase tracking-wider text-slate-500 dark:text-gray-400 mt-1">{content.stats_2_l}</p>
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-3xl font-bold text-slate-900 dark:text-white">Top 1%</p>
+                                    <p className="text-xs uppercase tracking-wider text-slate-500 dark:text-gray-400 mt-1">{content.stats_3_l}</p>
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-3xl font-bold text-slate-900 dark:text-white">USA</p>
+                                    <p className="text-xs uppercase tracking-wider text-slate-500 dark:text-gray-400 mt-1">{content.stats_4_l}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+                    <section className="relative py-24 bg-[#020617] overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-950/20 to-transparent opacity-50 pointer-events-none"></div>
+                        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
+                        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="grid lg:grid-cols-12 gap-12 lg:gap-20 items-center">
+                                <div className="lg:col-span-5 relative">
+                                    <div className="absolute -left-6 top-2 w-1 h-16 bg-primary rounded-sm hidden lg:block"></div>
+                                    <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight tracking-tight">
+                                        {content.pain_title_1} <br className="hidden lg:block" /> <span className="text-primary">{content.pain_title_2}</span> {content.pain_title_3}
+                                    </h2>
+                                    <div className="mt-6 w-24 h-1 bg-gradient-to-r from-primary to-transparent rounded-full"></div>
+                                </div>
+                                <div className="lg:col-span-7">
+                                    <div className="prose prose-lg prose-invert text-slate-300 font-light leading-relaxed">
+                                        <p className="text-xl md:text-2xl mb-8 text-white font-normal">
+                                            {content.pain_p1}
+                                        </p>
+                                        <p className="mb-6">
+                                            {content.pain_p2}
+                                        </p>
+                                        <p className="mb-6">
+                                            {content.pain_p3} <strong className="text-white border-b border-primary/50 pb-0.5">{content.pain_p3_strong}</strong>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            );
+        };
+
+        // --- Screen 2: Revelation ---
+        const RevelationPage = () => {
+            const { lang } = useContext(LanguageContext);
+            const t = {
+                es: {
+                    myth1: "Te vendieron la idea del",
+                    myth1_hl: "'autoempleo feliz'",
+                    myth2: "Te dijeron que con",
+                    myth2_hl1: "'pasión'",
+                    myth2_hl2: "'buena comida'",
+                    myth2_end: "bastaba",
+                    myth3: "Te hicieron creer que no necesitas",
+                    myth3_hl: "'saber de negocios'",
+                    hero_1: "La diferencia está en el",
+                    hero_hl: "sistema.",
+                    sub: "Y lo mejor es que, a diferencia de la suerte o el talento con el que nacemos,",
+                    sub_hl: "un sistema se puede aprender, adaptar e implementar.",
+                    cta_down: "Descubre para quién es"
+                },
+                en: {
+                    myth1: "They sold you the idea of",
+                    myth1_hl: "'happy self-employment'",
+                    myth2: "They told you that",
+                    myth2_hl1: "'passion'",
+                    myth2_hl2: "'good food'",
+                    myth2_end: "were enough",
+                    myth3: "They made you believe you don't need to",
+                    myth3_hl: "'know business'",
+                    hero_1: "The difference lies in the",
+                    hero_hl: "system.",
+                    sub: "And the best part is, unlike luck or born talent,",
+                    sub_hl: "a system can be learned, adapted, and implemented.",
+                    cta_down: "Discover who this is for"
+                }
+            };
+            const content = t[lang];
+
+            return (
+                <div className="relative flex min-h-screen w-full flex-col font-display bg-background-dark text-white">
+                    <main className="flex-grow flex flex-col items-center justify-center relative">
+                        <div className="absolute inset-0 pointer-events-none moody-glow z-0"></div>
+                        <div className="layout-content-container flex flex-col w-full max-w-[1000px] flex-1 px-4 sm:px-6 lg:px-8 py-16 z-10">
+
+                            <div className="flex flex-col items-center justify-center gap-4 mb-10 opacity-0 animate-fadeIn">
+                                <div className="bg-[#1c2230]/50 border border-[#282e39] rounded-xl p-6 sm:p-8 backdrop-blur-sm max-w-2xl w-full">
+                                    <div className="flex flex-col gap-5">
+                                        <div className="flex items-start gap-3 sm:gap-4 group">
+                                            <span className="text-xl sm:text-2xl select-none group-hover:scale-110 transition-transform duration-300">👉</span>
+                                            <p className="text-slate-400 group-hover:text-slate-200 text-base sm:text-lg font-normal leading-relaxed transition-colors duration-300">
+                                                {content.myth1} <span className="italic text-white">{content.myth1_hl}</span>
+                                            </p>
+                                        </div>
+                                        <div className="w-full h-px bg-[#282e39]"></div>
+                                        <div className="flex items-start gap-3 sm:gap-4 group">
+                                            <span className="text-xl sm:text-2xl select-none group-hover:scale-110 transition-transform duration-300">👉</span>
+                                            <p className="text-slate-400 group-hover:text-slate-200 text-base sm:text-lg font-normal leading-relaxed transition-colors duration-300">
+                                                {content.myth2} <span className="italic text-white">{content.myth2_hl1}</span> {lang === 'es' ? 'y' : 'and'} <span className="italic text-white">{content.myth2_hl2}</span> {content.myth2_end}
+                                            </p>
+                                        </div>
+                                        <div className="w-full h-px bg-[#282e39]"></div>
+                                        <div className="flex items-start gap-3 sm:gap-4 group">
+                                            <span className="text-xl sm:text-2xl select-none group-hover:scale-110 transition-transform duration-300">👉</span>
+                                            <p className="text-slate-400 group-hover:text-slate-200 text-base sm:text-lg font-normal leading-relaxed transition-colors duration-300">
+                                                {content.myth3} <span class="italic text-white">{content.myth3_hl}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="py-24 sm:py-32 flex flex-col items-center justify-center text-center relative">
+                                <span className="material-symbols-outlined absolute text-[200px] sm:text-[300px] text-primary/5 select-none -z-10 animate-pulse">
+                                    hub
+                                </span>
+                                <h1 className="text-white text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-[1.1] tracking-[-0.033em] max-w-5xl mx-auto drop-shadow-2xl">
+                                    {content.hero_1} <span className="text-primary bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-400 to-primary bg-[length:200%_auto] animate-gradient">{content.hero_hl}</span>
+                                </h1>
+                            </div>
+
+                            <div className="flex flex-col items-center justify-center max-w-3xl mx-auto text-center px-4">
+                                <div className="h-1 w-24 bg-primary rounded-full mb-8 opacity-80"></div>
+                                <p className="text-slate-200 text-xl sm:text-2xl font-light leading-relaxed tracking-wide">
+                                    {content.sub} <span className="font-semibold text-white">{content.sub_hl}</span>
+                                </p>
+
+                                <div
+                                    className="mt-12 opacity-60 hover:opacity-100 transition-opacity cursor-pointer flex flex-col items-center gap-2"
+                                    onClick={() => scrollToSection('target')}
+                                >
+                                    <span className="text-sm uppercase tracking-widest text-primary font-bold">{content.cta_down}</span>
+                                    <span className="material-symbols-outlined text-primary animate-bounce">keyboard_arrow_down</span>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        // --- Screen 1: Target Audience ---
+        const TargetPage = () => {
+            const { lang } = useContext(LanguageContext);
+            const t = {
+                es: {
+                    pill: "¿Es para mí?",
+                    title: "Claridad para tu Negocio Gastronómico",
+                    sub: "Un enfoque directo para quienes buscan transformar la gestión de su restaurante en resultados tangibles.",
+                    card1_title: "¿A QUIÉN ESTÁ DIRIGIDO?",
+                    card1_list: ["Dueños y socios de restaurantes", "Emprendedores gastronómicos", "Gerentes y administradores", "Cadenas pequeñas y medianas"],
+                    card1_last_1: "Proyectos en crecimiento o en",
+                    card1_last_hl: "crisis silenciosa",
+                    card1_quote: "\"No es para curiosos. Es para quienes toman decisiones.\"",
+                    card2_title: "EL RESULTADO FINAL",
+                    card2_list: ["Sistema claro", "Decisiones ordenadas", "Herramientas concretas", "Acompañamiento real", "Plan aplicable al negocio"],
+                    card2_cta_1: "Transformarás el caos operativo en una",
+                    card2_cta_hl: "máquina de rentabilidad",
+                    card2_cta_link: "Ver Programa →"
+                },
+                en: {
+                    pill: "Is this for me?",
+                    title: "Clarity for your Gastronomic Business",
+                    sub: "A direct approach for those seeking to transform their restaurant management into tangible results.",
+                    card1_title: "WHO IS THIS FOR?",
+                    card1_list: ["Restaurant owners and partners", "Gastronomic entrepreneurs", "Managers and administrators", "Small and medium chains"],
+                    card1_last_1: "Projects growing or in",
+                    card1_last_hl: "silent crisis",
+                    card1_quote: "\"Not for the curious. It's for decision makers.\"",
+                    card2_title: "THE FINAL OUTCOME",
+                    card2_list: ["Clear system", "Orderly decisions", "Concrete tools", "Real guidance", "Plan applicable to the business"],
+                    card2_cta_1: "You will transform operational chaos into a",
+                    card2_cta_hl: "profitability machine",
+                    card2_cta_link: "See Program →"
+                }
+            };
+            const content = t[lang];
+
+            return (
+                <div className="relative flex min-h-screen w-full flex-col overflow-hidden bg-background-dark font-display text-white">
+                    <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+                        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px]"></div>
+                        <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px]"></div>
+                    </div>
+                    <main className="layout-container flex h-full grow flex-col justify-center items-center relative z-10 py-20 px-4 sm:px-8 lg:px-40">
+                        <div className="w-full max-w-6xl mx-auto">
+                            <div className="mb-16 text-center">
+                                <span className="inline-block py-1 px-3 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold tracking-widest uppercase mb-4">
+                                    {content.pill}
+                                </span>
+                                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
+                                    {content.title}
+                                </h2>
+                                <p className="text-slate-400 max-w-2xl mx-auto text-lg">
+                                    {content.sub}
+                                </p>
+                            </div>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
+                                <div className="bg-surface-dark border border-white/5 rounded-2xl p-8 lg:p-10 relative overflow-hidden group hover:border-primary/30 transition-colors duration-500 flex flex-col h-full">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-primary/10 transition-all duration-500"></div>
+                                    <div className="relative z-10 flex flex-col h-full">
+                                        <div className="flex items-center gap-3 mb-8">
+                                            <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                                                <span className="material-symbols-outlined">person_check</span>
+                                            </div>
+                                            <h3 className="text-xl font-bold tracking-wide text-white uppercase">{content.card1_title}</h3>
+                                        </div>
+                                        <ul className="space-y-5 mb-8 flex-grow">
+                                            {content.card1_list.map((item, idx) => (
+                                                <li key={idx} className="relative pl-6 text-slate-300 group-hover:text-white transition-colors duration-300">
+                                                    <span className="absolute left-0 top-[10px] w-1.5 h-1.5 rounded-full bg-primary/50 group-hover:bg-primary transition-colors duration-300"></span>
+                                                    <span className="font-medium text-white">{item}</span>
+                                                </li>
+                                            ))}
+                                            <li className="relative pl-6 text-slate-300 group-hover:text-white transition-colors duration-300">
+                                                <span className="absolute left-0 top-[10px] w-1.5 h-1.5 rounded-full bg-primary/50 group-hover:bg-primary transition-colors duration-300"></span>
+                                                {content.card1_last_1} <span className="text-primary italic font-semibold">{content.card1_last_hl}</span>
+                                            </li>
+                                        </ul>
+                                        <div className="mt-auto pt-6 border-t border-white/5">
+                                            <p className="text-sm font-medium text-slate-400 italic">
+                                                {content.card1_quote}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="bg-surface-darker border border-white/5 rounded-2xl p-8 lg:p-10 relative overflow-hidden group hover:border-emerald-500/30 transition-colors duration-500 flex flex-col h-full shadow-2xl shadow-black/40">
+                                    <div className="absolute bottom-0 left-0 w-40 h-40 bg-emerald-500/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 group-hover:bg-emerald-500/10 transition-all duration-500"></div>
+                                    <div className="relative z-10 flex flex-col h-full">
+                                        <div className="flex items-center gap-3 mb-8">
+                                            <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
+                                                <span className="material-symbols-outlined">verified</span>
+                                            </div>
+                                            <h3 className="text-xl font-bold tracking-wide text-white uppercase">{content.card2_title}</h3>
+                                        </div>
+                                        <ul className="space-y-4 mb-8 flex-grow">
+                                            {content.card2_list.map((item, idx) => (
+                                                <li key={idx} className="flex items-center gap-3 text-slate-300">
+                                                    <span className="material-symbols-outlined text-emerald-500 text-lg">check_circle</span>
+                                                    <span className="text-lg text-white font-medium">{item}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                        <div className="mt-auto relative">
+                                            <div className="absolute inset-0 bg-emerald-500/5 blur-xl"></div>
+                                            <div className="relative bg-gradient-to-r from-emerald-900/30 to-background-dark/50 border border-emerald-500/20 rounded-xl p-5 text-center cursor-pointer hover:bg-emerald-900/40 transition-colors" onClick={() => scrollToSection('program')}>
+                                                <p className="text-emerald-100 font-semibold text-lg leading-tight">
+                                                    {content.card2_cta_1} <span className="text-white font-bold border-b border-emerald-500">{content.card2_cta_hl}</span>.
+                                                    <span className="block text-xs mt-2 text-emerald-400 font-bold uppercase tracking-wider">{content.card2_cta_link}</span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        // --- Screen 3: Program ---
+        const ProgramPage = () => {
+            const { lang } = useContext(LanguageContext);
+            const t = {
+                es: {
+                    pill: "Método UADEN",
+                    title: "UN TRAINING DISTINTO",
+                    quote: "\"Porque el problema no es aprender. Es implementar.\"",
+                    phase1_pill: "Fase 01",
+                    phase1_title: "Training de Inmersión",
+                    phase1_desc_1: "2 días intensivos de",
+                    phase1_desc_hl: "estrategia pura",
+                    phase1_desc_2: ". Desafiamos los modelos tradicionales para reestructurar tu visión de negocio.",
+                    phase2_pill: "Fase 02",
+                    phase2_title: "Mes de Asesoría",
+                    phase2_desc_1: "Acompañamiento real para",
+                    phase2_desc_hl: "ejecutar lo aprendido",
+                    phase2_desc_2: ". Porque la teoría sin acción no genera resultados en tu restaurante.",
+                    cta: "Ver Inversión y Aplicar",
+                    limit: "Plazas limitadas por edición para garantizar la calidad."
+                },
+                en: {
+                    pill: "UADEN Method",
+                    title: "A DIFFERENT TRAINING",
+                    quote: "\"Because the problem isn't learning. It's implementing.\"",
+                    phase1_pill: "Phase 01",
+                    phase1_title: "Immersion Training",
+                    phase1_desc_1: "2 intensive days of",
+                    phase1_desc_hl: "pure strategy",
+                    phase1_desc_2: ". We challenge traditional models to restructure your business vision.",
+                    phase2_pill: "Phase 02",
+                    phase2_title: "Advisory Month",
+                    phase2_desc_1: "Real accompaniment to",
+                    phase2_desc_hl: "execute what you learned",
+                    phase2_desc_2: ". Because theory without action doesn't generate results in your restaurant.",
+                    cta: "See Investment & Apply",
+                    limit: "Limited spots per edition to ensure quality."
+                }
+            };
+            const content = t[lang];
+
+            return (
+                <div className="relative flex min-h-screen w-full flex-col overflow-hidden bg-background-dark font-display text-white">
+                    <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+                        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px]"></div>
+                        <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px]"></div>
+                    </div>
+                    <main className="layout-container flex h-full grow flex-col justify-center items-center relative z-10 py-20 px-4 sm:px-8 lg:px-40">
+                        <div className="max-w-4xl w-full text-center mb-16">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 mb-6">
+                                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                                <span className="text-primary text-xs font-bold tracking-widest uppercase">{content.pill}</span>
+                            </div>
+                            <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/70">
+                                {content.title}
+                            </h2>
+                            <p className="text-slate-400 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mx-auto italic border-l-2 border-primary/50 pl-4 md:border-l-0 md:pl-0">
+                                {content.quote}
+                            </p>
+                        </div>
+
+                        <div className="w-full max-w-5xl">
+                            <div className="relative grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+                                {/* Connector Line Desktop */}
+                                <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-[2px] z-20">
+                                    <div className="w-full h-full bg-gradient-to-r from-transparent via-primary to-transparent opacity-70"></div>
+                                    <span className="material-symbols-outlined absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary bg-background-dark p-1 rounded-full text-sm">arrow_forward</span>
+                                </div>
+
+                                {/* Phase 1 */}
+                                <div className="group relative flex flex-col items-center text-center p-8 md:p-10 rounded-2xl bg-surface-dark border border-white/5 hover:border-primary/30 transition-all duration-300 glow-accent hover:bg-white/[0.02]">
+                                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    <div className="mb-6 p-4 rounded-full bg-primary/10 text-primary border border-primary/20 shadow-[0_0_15px_-3px_rgba(239,69,55,0.3)]">
+                                        <span className="material-symbols-outlined text-4xl">psychology</span>
+                                    </div>
+                                    <div className="space-y-3">
+                                        <div className="inline-block px-3 py-1 rounded-md bg-white/5 text-[10px] font-bold tracking-wider uppercase text-slate-400 mb-2">{content.phase1_pill}</div>
+                                        <h3 className="text-2xl font-bold text-white group-hover:text-primary transition-colors">{content.phase1_title}</h3>
+                                        <div className="h-px w-12 bg-white/10 mx-auto my-3"></div>
+                                        <p className="text-slate-400 font-medium leading-relaxed">
+                                            {content.phase1_desc_1} <span className="text-white">{content.phase1_desc_hl}</span>{content.phase1_desc_2}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Mobile Connector */}
+                                <div className="flex md:hidden justify-center -my-4 z-20">
+                                    <span className="material-symbols-outlined text-primary/50 rotate-90 text-3xl">arrow_downward</span>
+                                </div>
+
+                                {/* Phase 2 */}
+                                <div className="group relative flex flex-col items-center text-center p-8 md:p-10 rounded-2xl bg-surface-dark border border-white/5 hover:border-primary/30 transition-all duration-300 glow-accent hover:bg-white/[0.02]">
+                                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    <div className="mb-6 p-4 rounded-full bg-primary/10 text-primary border border-primary/20 shadow-[0_0_15px_-3px_rgba(239,69,55,0.3)]">
+                                        <span className="material-symbols-outlined text-4xl">rocket_launch</span>
+                                    </div>
+                                    <div className="space-y-3">
+                                        <div className="inline-block px-3 py-1 rounded-md bg-white/5 text-[10px] font-bold tracking-wider uppercase text-slate-400 mb-2">{content.phase2_pill}</div>
+                                        <h3 className="text-2xl font-bold text-white group-hover:text-primary transition-colors">{content.phase2_title}</h3>
+                                        <div className="h-px w-12 bg-white/10 mx-auto my-3"></div>
+                                        <p className="text-slate-400 font-medium leading-relaxed">
+                                            {content.phase2_desc_1} <span class="text-white">{content.phase2_desc_hl}</span>{content.phase2_desc_2}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-16 text-center">
+                            <button
+                                onClick={() => scrollToSection('pricing')}
+                                className="relative inline-flex items-center justify-center px-8 py-3 overflow-hidden font-bold text-white transition-all duration-300 bg-primary rounded-lg group hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background-dark"
+                            >
+                                <span className="absolute w-0 h-0 transition-all duration-500 ease-out bg-white rounded-full group-hover:w-56 group-hover:h-56 opacity-10"></span>
+                                <span className="relative flex items-center gap-2">
+                                    {content.cta}
+                                    <span className="material-symbols-outlined text-sm font-bold">arrow_forward</span>
+                                </span>
+                            </button>
+                            <p className="mt-4 text-xs text-slate-500">{content.limit}</p>
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        // --- Screen 4: Pricing ---
+        const PricingPage = () => {
+            const { lang } = useContext(LanguageContext);
+            const t = {
+                es: {
+                    title: "INVERSIÓN DEL PROGRAMA",
+                    subtitle: "Valor Estándar:",
+                    subtitle_note: "(Programa integral de seminario + asesoría)",
+                    card1_title: "Precio Promocional",
+                    card1_sub: "Pago único",
+                    card1_feat1: "Ahorro inmediato sobre el valor estándar",
+                    card1_feat2: "Acceso inmediato a materiales previos",
+                    card1_btn: "Seleccionar",
+                    card2_tag: "Más Popular",
+                    card2_sub: "Pago único",
+                    card2_cond_label: "Condición",
+                    card2_cond_text: "Hasta 20 días antes de la fecha de inicio",
+                    card2_feat: "Doble tiempo de asesoría sin costo extra",
+                    card2_btn: "Aprovechar Early Bird",
+                    card3_title: "Opciones de Pago",
+                    card3_sub: "Facilidades en cuotas",
+                    card3_opt1_title: "2 cuotas de USD 420",
+                    card3_opt1_desc: "1ª cuota al inscribirse\n2ª cuota a los 30 días",
+                    card3_opt2_title: "3 cuotas de USD 240",
+                    card3_opt2_desc: "La última cuota se abona 30 días después de finalizado el programa",
+                    card3_btn: "Ver Planes",
+                    features_title: "Todo lo que incluye tu inversión:",
+                    features_list: [
+                        "Jornada integral de Seminario Intensivo", "Manuales y material de apoyo", "Diapositivas completas del seminario", "Asistencia sin límite de participantes por empresa",
+                        "Garantía de retransmisión", "Un mes de seguimiento de implementación", "4 reuniones semanales de asesoría", "Posibilidad de extender la asesoría",
+                        "Interacción permanente con los expertos", "Diploma de aprobación", "Constancia institucional para la empresa"
+                    ],
+                    cta_title: "Asegura tu lugar en la élite empresarial",
+                    cta_desc: "Espacios limitados para garantizar la calidad de la asesoría personalizada.",
+                    cta_btn: "Reservar mi Lugar"
+                },
+                en: {
+                    title: "PROGRAM INVESTMENT",
+                    subtitle: "Standard Value:",
+                    subtitle_note: "(Comprehensive seminar + advisory program)",
+                    card1_title: "Promotional Price",
+                    card1_sub: "One-time payment",
+                    card1_feat1: "Immediate savings on standard value",
+                    card1_feat2: "Immediate access to previous materials",
+                    card1_btn: "Select",
+                    card2_tag: "Most Popular",
+                    card2_sub: "One-time payment",
+                    card2_cond_label: "Condition",
+                    card2_cond_text: "Up to 20 days before start date",
+                    card2_feat: "Double advisory time at no extra cost",
+                    card2_btn: "Get Early Bird",
+                    card3_title: "Payment Options",
+                    card3_sub: "Installment plans",
+                    card3_opt1_title: "2 installments of USD 420",
+                    card3_opt1_desc: "1st installment upon registration\n2nd installment after 30 days",
+                    card3_opt2_title: "3 installments of USD 240",
+                    card3_opt2_desc: "The last installment is paid 30 days after the program ends",
+                    card3_btn: "View Plans",
+                    features_title: "Everything your investment includes:",
+                    features_list: [
+                        "Comprehensive Intensive Seminar Day", "Manuals and support material", "Full seminar slides", "Unlimited attendees per company",
+                        "Retransmission guarantee", "One month of implementation follow-up", "4 weekly advisory meetings", "Possibility to extend advisory",
+                        "Permanent interaction with experts", "Approval Diploma", "Institutional certificate for the company"
+                    ],
+                    cta_title: "Secure your place in the business elite",
+                    cta_desc: "Limited spaces to guarantee the quality of personalized advisory.",
+                    cta_btn: "Reserve My Spot"
+                }
+            };
+            const content = t[lang];
+
+            return (
+                <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden bg-background-dark font-display text-white">
+                    <div className="fixed inset-0 z-0 pointer-events-none opacity-10 bg-[radial-gradient(circle_at_50%_0%,#ef4537_0%,transparent_50%)]"></div>
+                    <div className="relative z-10 layout-container flex h-full grow flex-col py-10">
+                        <div className="px-4 md:px-10 flex flex-1 justify-center py-5">
+                            <div className="layout-content-container flex flex-col max-w-[960px] flex-1 items-center">
+                                <h2 className="text-white text-[28px] md:text-[32px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5 text-center uppercase">
+                                    {content.title}
+                                </h2>
+                                <h3 className="text-slate-400 tracking-light text-xl md:text-2xl font-medium leading-tight px-4 text-center pb-2">
+                                    {content.subtitle} <span className="line-through decoration-red-500 decoration-2">USD 890</span> <span className="text-sm md:text-base block md:inline mt-1 md:mt-0 opacity-80">{content.subtitle_note}</span>
+                                </h3>
+                            </div>
+                        </div>
+
+                        <div className="px-4 md:px-10 flex flex-1 justify-center py-5">
+                            <div className="layout-content-container flex flex-col max-w-[1100px] flex-1">
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 px-4 py-3 items-start">
+                                    {/* Promotional Price */}
+                                    <div className="flex flex-1 flex-col gap-6 rounded-xl border border-solid border-[#3b4354] bg-[#1c1f27] p-8 shadow-sm h-full">
+                                        <div className="flex flex-col gap-2">
+                                            <h1 className="text-white text-lg font-bold leading-tight">{content.card1_title}</h1>
+                                            <p className="flex items-baseline gap-2 text-white">
+                                                <span className="text-4xl font-black leading-tight tracking-[-0.033em]">USD 840</span>
+                                            </p>
+                                            <span className="text-slate-400 text-sm font-medium leading-tight">{content.card1_sub}</span>
+                                        </div>
+                                        <div className="border-t border-slate-700 w-full my-2"></div>
+                                        <div className="flex flex-col gap-3 grow">
+                                            <div className="text-sm font-normal leading-normal flex gap-3 text-slate-300">
+                                                <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>savings</span>
+                                                {content.card1_feat1}
+                                            </div>
+                                            <div className="text-sm font-normal leading-normal flex gap-3 text-slate-300">
+                                                <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>bolt</span>
+                                                {content.card1_feat2}
+                                            </div>
+                                        </div>
+                                        <button className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-[#282e39] hover:bg-[#343b49] text-white text-sm font-bold leading-normal tracking-[0.015em] transition-colors mt-auto">
+                                            <span className="truncate">{content.card1_btn}</span>
+                                        </button>
+                                    </div>
+
+                                    {/* Early Bird */}
+                                    <div className="relative flex flex-1 flex-col gap-6 rounded-xl border-2 border-solid border-primary bg-[#151820] p-8 shadow-xl shadow-primary/10 scale-100 lg:scale-105 z-10 h-full">
+                                        <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white text-xs font-bold uppercase tracking-wider py-1.5 px-4 rounded-full shadow-lg">
+                                            {content.card2_tag}
+                                        </div>
+                                        <div className="flex flex-col gap-2 pt-2">
+                                            <h1 className="text-primary text-lg font-bold leading-tight flex items-center gap-2">
+                                                Early Bird
+                                                <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>stars</span>
+                                            </h1>
+                                            <p className="flex items-baseline gap-2 text-white">
+                                                <span className="text-5xl font-black leading-tight tracking-[-0.033em]">USD 740</span>
+                                            </p>
+                                            <span className="text-slate-400 text-sm font-medium leading-tight">{content.card2_sub}</span>
+                                        </div>
+                                        <div className="border-t border-slate-700 w-full my-2"></div>
+                                        <div className="flex flex-col gap-4 grow">
+                                            <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
+                                                <p className="text-xs text-primary font-bold uppercase mb-1">{content.card2_cond_label}</p>
+                                                <p className="text-sm text-slate-200">{content.card2_cond_text}</p>
+                                            </div>
+                                            <div className="flex gap-3 text-white font-medium text-sm">
+                                                <span className="material-symbols-outlined text-primary shrink-0" style={{ fontSize: '22px' }}>check_circle</span>
+                                                <span>{content.card2_feat}</span>
+                                            </div>
+                                        </div>
+                                        <button className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-primary hover:bg-primary-dark text-white text-sm font-bold leading-normal tracking-[0.015em] transition-colors mt-auto shadow-lg shadow-primary/25">
+                                            <span className="truncate">{content.card2_btn}</span>
+                                        </button>
+                                    </div>
+
+                                    {/* Payment Options */}
+                                    <div className="flex flex-1 flex-col gap-6 rounded-xl border border-solid border-[#3b4354] bg-[#1c1f27] p-8 shadow-sm h-full">
+                                        <div className="flex flex-col gap-2">
+                                            <h1 className="text-white text-lg font-bold leading-tight">{content.card3_title}</h1>
+                                            <p className="flex items-baseline gap-2 text-white">
+                                                <span className="text-3xl font-black leading-tight tracking-[-0.033em]">Financiamiento</span>
+                                            </p>
+                                            <span className="text-slate-400 text-sm font-medium leading-tight">{content.card3_sub}</span>
+                                        </div>
+                                        <div className="border-t border-slate-700 w-full my-2"></div>
+                                        <div className="flex flex-col gap-4 grow">
+                                            <div className="flex flex-col gap-1">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="material-symbols-outlined text-white bg-slate-800 rounded-full p-1" style={{ fontSize: '16px' }}>filter_2</span>
+                                                    <span className="text-white font-bold text-sm">{content.card3_opt1_title}</span>
+                                                </div>
+                                                <p className="text-xs text-slate-400 pl-8 leading-relaxed whitespace-pre-line">
+                                                    {content.card3_opt1_desc}
+                                                </p>
+                                            </div>
+                                            <div className="flex flex-col gap-1">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="material-symbols-outlined text-white bg-slate-800 rounded-full p-1" style={{ fontSize: '16px' }}>filter_3</span>
+                                                    <span className="text-white font-bold text-sm">{content.card3_opt2_title}</span>
+                                                </div>
+                                                <p className="text-xs text-slate-400 pl-8 leading-relaxed">
+                                                    {content.card3_opt2_desc}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <button className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-[#282e39] hover:bg-[#343b49] text-white text-sm font-bold leading-normal tracking-[0.015em] transition-colors mt-auto">
+                                            <span className="truncate">{content.card3_btn}</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="px-4 md:px-10 flex flex-1 justify-center py-8">
+                            <div className="layout-content-container flex flex-col max-w-[960px] flex-1 bg-[#161a23] rounded-2xl p-6 md:p-10 border border-slate-800">
+                                <h4 className="text-white text-lg font-bold mb-6 text-center md:text-left flex items-center gap-3 justify-center md:justify-start">
+                                    <span className="material-symbols-outlined text-primary">verified</span>
+                                    {content.features_title}
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                                    {content.features_list.map((item, i) => (
+                                        <div key={i} className="flex items-start gap-3">
+                                            <span className="material-symbols-outlined text-primary shrink-0 pt-0.5" style={{ fontSize: '20px' }}>check</span>
+                                            <p className="text-slate-300 text-sm md:text-base font-normal leading-normal">{item}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="px-4 md:px-10 flex flex-1 justify-center py-10">
+                            <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
+                                <div className="flex flex-col justify-center items-center gap-6 px-4 py-8 rounded-xl bg-gradient-to-r from-[#111318] to-[#1c1f27] border border-[#3b4354] relative overflow-hidden">
+                                    <div className="absolute right-0 top-0 w-64 h-64 bg-primary/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+                                    <div className="flex flex-col gap-3 text-center z-10">
+                                        <h2 className="text-white tracking-tight text-2xl md:text-3xl font-bold leading-tight max-w-[720px]">
+                                            {content.cta_title}
+                                        </h2>
+                                        <p className="text-slate-400 text-base font-normal leading-normal max-w-[600px] mx-auto">
+                                            {content.cta_desc}
+                                        </p>
+                                    </div>
+                                    <div className="flex justify-center z-10 w-full md:w-auto">
+                                        <button className="flex min-w-[200px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-8 bg-primary hover:bg-primary-dark text-white text-base font-bold leading-normal tracking-[0.015em] transition-all shadow-lg hover:shadow-primary/50">
+                                            <span className="truncate">{content.cta_btn}</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Screen 6: Mentors ---
+        const MentorsPage = () => {
+            const { lang } = useContext(LanguageContext);
+            const t = {
+                es: {
+                    pill: "Experiencia Real",
+                    title: "Nuestros Mentores",
+                    sub: "Aprende de quienes ya han recorrido el camino y han transformado la industria.",
+                    name: "Carlos Rodriguez",
+                    role: "CEO & Fundador UADEN",
+                    cert: "Certificado Elite",
+                    quote_1: "\"El éxito en la gastronomía no es suerte, es",
+                    quote_hl: "ingeniería de negocios",
+                    quote_2: ".\"",
+                    bio_1: "Con más de 15 años de experiencia transformando restaurantes en crisis en modelos de negocio altamente rentables. Carlos ha desarrollado la metodología UADEN Prime basándose en la realidad operativa, no en teoría de salón.",
+                    bio_2: "Ha asesorado a más de 500 establecimientos en Latinoamérica y Estados Unidos, especializándose en la estandarización de procesos y la maximización de márgenes de ganancia sin sacrificar la calidad del producto.",
+                    stat_1_l: "Años de Experiencia",
+                    stat_2_l: "Casos de Éxito",
+                    cta: "Conoce más sobre su trayectoria"
+                },
+                en: {
+                    pill: "Real Experience",
+                    title: "Our Mentors",
+                    sub: "Learn from those who have already walked the path and transformed the industry.",
+                    name: "Carlos Rodriguez",
+                    role: "CEO & Founder UADEN",
+                    cert: "Elite Certified",
+                    quote_1: "\"Success in gastronomy isn't luck, it's",
+                    quote_hl: "business engineering",
+                    quote_2: ".\"",
+                    bio_1: "With over 15 years of experience transforming crisis-ridden restaurants into highly profitable business models. Carlos developed the UADEN Prime methodology based on operational reality, not classroom theory.",
+                    bio_2: "He has advised over 500 establishments in Latin America and the United States, specializing in process standardization and maximizing profit margins without sacrificing product quality.",
+                    stat_1_l: "Years of Experience",
+                    stat_2_l: "Success Stories",
+                    cta: "Learn more about his trajectory"
+                }
+            };
+            const content = t[lang];
+
+            return (
+                <div className="relative flex min-h-screen w-full flex-col overflow-hidden bg-surface-dark font-display text-white">
+                    <div className="absolute inset-0 bg-background-dark/50"></div>
+                    <div className="relative z-10 layout-container flex h-full grow flex-col justify-center items-center py-20 px-4 sm:px-8 lg:px-40">
+                        <div className="max-w-6xl w-full">
+                            <div className="text-center mb-16">
+                                <span className="text-primary text-sm font-bold tracking-widest uppercase mb-2 block">{content.pill}</span>
+                                <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">{content.title}</h2>
+                                <p className="text-slate-400 max-w-2xl mx-auto text-lg">
+                                    {content.sub}
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                                {/* Image Side */}
+                                <div className="relative group">
+                                    <div className="absolute -inset-4 bg-gradient-to-r from-primary to-blue-600 rounded-xl opacity-30 blur-lg group-hover:opacity-50 transition duration-500"></div>
+                                    <div className="relative rounded-xl overflow-hidden aspect-[3/4] md:aspect-square shadow-2xl">
+                                        <img
+                                            src="https://images.unsplash.com/photo-1556157382-97eda2d62296?q=80&w=2070&auto=format&fit=crop"
+                                            alt="Mentor Gastronómico"
+                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                        />
+                                        <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6">
+                                            <h3 className="text-2xl font-bold text-white">{content.name}</h3>
+                                            <p className="text-primary font-medium">{content.role}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Content Side */}
+                                <div className="space-y-6">
+                                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 w-fit">
+                                        <span className="material-symbols-outlined text-primary text-sm">verified</span>
+                                        <span className="text-xs font-bold text-slate-300 uppercase tracking-wide">{content.cert}</span>
+                                    </div>
+
+                                    <h3 className="text-3xl font-bold text-white leading-tight">
+                                        {content.quote_1} <span className="text-primary">{content.quote_hl}</span>{content.quote_2}
+                                    </h3>
+
+                                    <div className="prose prose-invert text-slate-400">
+                                        <p className="leading-relaxed">
+                                            {content.bio_1}
+                                        </p>
+                                        <p className="leading-relaxed mt-4">
+                                            {content.bio_2}
+                                        </p>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4 mt-8">
+                                        <div className="p-4 rounded-lg bg-background-dark border border-white/5">
+                                            <p className="text-2xl font-bold text-white mb-1">15+</p>
+                                            <p className="text-xs text-slate-500 uppercase tracking-wider">{content.stat_1_l}</p>
+                                        </div>
+                                        <div className="p-4 rounded-lg bg-background-dark border border-white/5">
+                                            <p className="text-2xl font-bold text-white mb-1">500+</p>
+                                            <p className="text-xs text-slate-500 uppercase tracking-wider">{content.stat_2_l}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-6">
+                                        <button className="text-white hover:text-primary transition-colors flex items-center gap-2 font-medium group">
+                                            <span>{content.cta}</span>
+                                            <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Main App Component ---
+        const App = () => {
+            const [lang, setLang] = useState('es');
+            const toggleLang = () => setLang(l => l === 'es' ? 'en' : 'es');
+
+            return (
+                <LanguageContext.Provider value={{ lang, toggleLang }}>
+                    <div className="min-h-screen">
+                        <div id="home"><HomePage /></div>
+                        <div id="revelation"><RevelationPage /></div>
+                        <div id="target"><TargetPage /></div>
+                        <div id="program"><ProgramPage /></div>
+                        <div id="pricing"><PricingPage /></div>
+                        <div id="mentors"><MentorsPage /></div>
+                        <Navigation />
+                        {/* Container for n8n Chatbot */}
+                        <div id="n8n-chat"></div>
+                    </div>
+                </LanguageContext.Provider>
+            );
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(
+            <MemoryRouter>
+                <App />
+            </MemoryRouter>
+        );
+    </script>
+</body>
+
+</html>
