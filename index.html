@@ -71,6 +71,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         rel="stylesheet" />
 
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <!-- React Dependencies -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -240,6 +243,11 @@
                 borderRadius: '8px',
             }
         });
+
+        // Initialize Supabase
+        const supabaseUrl = 'https://tfxahepdqyhaajtygnyj.supabase.co';
+        const supabaseKey = 'sb_publishable_Sx4p-ZZpxo9uBlVyUlXS9w_2Nh2nqRl';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
     </script>
 
     <script type="text/babel">
@@ -284,8 +292,162 @@
             );
         };
 
+        // --- Enrollment Modal Component ---
+        const EnrollmentModal = ({ isOpen, onClose }) => {
+            const { lang } = useContext(LanguageContext);
+            const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
+            const [status, setStatus] = useState('idle'); // idle, loading, success, error
+
+            const t = {
+                es: {
+                    title: "Inscripción al Programa",
+                    nameLabel: "Nombre Completo",
+                    namePlaceholder: "Tu nombre",
+                    emailLabel: "Email",
+                    emailPlaceholder: "tu@email.com",
+                    phoneLabel: "Teléfono",
+                    phonePlaceholder: "+54 9 11...",
+                    messageLabel: "Mensaje (Opcional)",
+                    messagePlaceholder: "¿Tienes alguna duda específica?",
+                    submitBtn: "ENVIAR SOLICITUD",
+                    successTitle: "¡Solicitud Enviada!",
+                    successSub: "Nos pondremos en contacto contigo pronto.",
+                    errorMsg: "Hubo un error al enviar. Por favor intenta de nuevo."
+                },
+                en: {
+                    title: "Program Enrollment",
+                    nameLabel: "Full Name",
+                    namePlaceholder: "Your name",
+                    emailLabel: "Email",
+                    emailPlaceholder: "your@email.com",
+                    phoneLabel: "Phone",
+                    phonePlaceholder: "+1 234...",
+                    messageLabel: "Message (Optional)",
+                    messagePlaceholder: "Do you have any specific questions?",
+                    submitBtn: "SEND APPLICATION",
+                    successTitle: "Application Sent!",
+                    successSub: "We will be in touch with you soon.",
+                    errorMsg: "There was an error sending. Please try again."
+                }
+            };
+
+            const content = t[lang];
+
+            if (!isOpen) return null;
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setStatus('loading');
+                try {
+                    const { error } = await supabase.from('solicitudes').insert([{
+                        nombre: formData.name,
+                        email: formData.email,
+                        telefono: formData.phone,
+                        mensaje: formData.message,
+                        created_at: new Date().toISOString()
+                    }]);
+
+                    if (error) throw error;
+                    setStatus('success');
+                    setTimeout(() => {
+                        onClose();
+                        setStatus('idle');
+                        setFormData({ name: '', email: '', phone: '', message: '' });
+                    }, 2000);
+                } catch (err) {
+                    console.error('Error submitting:', err);
+                    setStatus('error');
+                }
+            };
+
+            return (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose}></div>
+                    <div className="relative bg-[#1c2333] border border-gray-700 rounded-2xl w-full max-w-md p-8 shadow-2xl animate-fade-in-up">
+                        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+                            <span className="material-icons-outlined">close</span>
+                        </button>
+
+                        {status === 'success' ? (
+                            <div className="text-center py-10">
+                                <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-4 text-green-500">
+                                    <span className="material-icons-outlined text-4xl">check_circle</span>
+                                </div>
+                                <h3 className="text-2xl font-bold text-white mb-2">{content.successTitle}</h3>
+                                <p className="text-gray-400">{content.successSub}</p>
+                            </div>
+                        ) : (
+                            <React.Fragment>
+                                <h2 className="text-2xl font-bold text-white mb-6 text-center">{content.title}</h2>
+                                <form onSubmit={handleSubmit} className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-400 mb-1">{content.nameLabel}</label>
+                                        <input
+                                            required
+                                            type="text"
+                                            className="w-full bg-[#151b29] border border-gray-700 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder-gray-600"
+                                            placeholder={content.namePlaceholder}
+                                            value={formData.name}
+                                            onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-400 mb-1">{content.emailLabel}</label>
+                                        <input
+                                            required
+                                            type="email"
+                                            className="w-full bg-[#151b29] border border-gray-700 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder-gray-600"
+                                            placeholder={content.emailPlaceholder}
+                                            value={formData.email}
+                                            onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-400 mb-1">{content.phoneLabel}</label>
+                                        <input
+                                            required
+                                            type="tel"
+                                            className="w-full bg-[#151b29] border border-gray-700 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder-gray-600"
+                                            placeholder={content.phonePlaceholder}
+                                            value={formData.phone}
+                                            onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-400 mb-1">{content.messageLabel}</label>
+                                        <textarea
+                                            className="w-full bg-[#151b29] border border-gray-700 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder-gray-600 h-24 resize-none"
+                                            placeholder={content.messagePlaceholder}
+                                            value={formData.message}
+                                            onChange={e => setFormData({ ...formData, message: e.target.value })}
+                                        ></textarea>
+                                    </div>
+
+                                    {status === 'error' && (
+                                        <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm text-center">
+                                            {content.errorMsg}
+                                        </div>
+                                    )}
+
+                                    <button
+                                        type="submit"
+                                        disabled={status === 'loading'}
+                                        className="w-full py-4 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition-all shadow-lg hover:shadow-primary/25 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                                    >
+                                        {status === 'loading' ? (
+                                            <span className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
+                                        ) : content.submitBtn}
+                                    </button>
+                                </form>
+                            </React.Fragment>
+                        )}
+                    </div>
+                </div >
+            );
+        };
+
         // --- Screen 5: Home (Landing) ---
-        const HomePage = () => {
+        const HomePage = ({ onOpenEnrollment }) => {
             const { lang, toggleLang } = useContext(LanguageContext);
             const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
             const t = {
@@ -365,9 +527,9 @@
                                         <span className={lang === 'en' ? 'text-primary' : 'text-gray-500'}>EN</span>
                                     </button>
 
-                                    <a className="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-sm shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all" href="#">
+                                    <button onClick={() => onOpenEnrollment()} className="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-sm shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all">
                                         {content.access}
-                                    </a>
+                                    </button>
                                 </div>
                                 <div className="md:hidden flex items-center gap-4">
                                     <button onClick={toggleLang} className="text-sm font-bold text-gray-600 dark:text-gray-300 hover:text-primary">
@@ -396,11 +558,15 @@
                             <button onClick={toggleLang} className="text-lg font-bold text-gray-400 hover:text-white transition-colors">
                                 {lang === 'es' ? 'Cambiar a Inglés' : 'Switch to Spanish'}
                             </button>
-                            <a className="px-8 py-3 rounded-full bg-primary text-white font-bold text-lg hover:bg-primary-dark transition-colors shadow-lg shadow-primary/25" href="#">
+                            <button
+                                className="px-8 py-3 rounded-full bg-primary text-white font-bold text-lg hover:bg-primary-dark transition-colors shadow-lg shadow-primary/25"
+                                onClick={() => { setIsMobileMenuOpen(false); onOpenEnrollment(); }}
+                            >
                                 {content.access}
-                            </a>
+                            </button>
                         </div>
                     </div>
+
 
                     <header className="relative min-h-screen flex items-center justify-center overflow-hidden">
                         <div className="absolute inset-0 z-0">
@@ -721,7 +887,7 @@
         };
 
         // --- Screen 3: Program ---
-        const ProgramPage = () => {
+        const ProgramPage = ({ onOpenEnrollment }) => {
             const { lang } = useContext(LanguageContext);
             const t = {
                 es: {
@@ -830,7 +996,7 @@
 
                         <div className="mt-16 text-center">
                             <button
-                                onClick={() => scrollToSection('pricing')}
+                                onClick={() => onOpenEnrollment()}
                                 className="relative inline-flex items-center justify-center px-8 py-3 overflow-hidden font-bold text-white transition-all duration-300 bg-primary rounded-lg group hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background-dark"
                             >
                                 <span className="absolute w-0 h-0 transition-all duration-500 ease-out bg-white rounded-full group-hover:w-56 group-hover:h-56 opacity-10"></span>
@@ -847,7 +1013,7 @@
         };
 
         // --- Screen 4: Pricing ---
-        const PricingPage = () => {
+        const PricingPage = ({ onOpenEnrollment }) => {
             const { lang } = useContext(LanguageContext);
             const t = {
                 es: {
@@ -955,7 +1121,7 @@
                                                 {content.card1_feat2}
                                             </div>
                                         </div>
-                                        <button className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-[#282e39] hover:bg-[#343b49] text-white text-sm font-bold leading-normal tracking-[0.015em] transition-colors mt-auto">
+                                        <button onClick={() => onOpenEnrollment()} className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-[#282e39] hover:bg-[#343b49] text-white text-sm font-bold leading-normal tracking-[0.015em] transition-colors mt-auto">
                                             <span className="truncate">{content.card1_btn}</span>
                                         </button>
                                     </div>
@@ -986,7 +1152,7 @@
                                                 <span>{content.card2_feat}</span>
                                             </div>
                                         </div>
-                                        <button className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-primary hover:bg-primary-dark text-white text-sm font-bold leading-normal tracking-[0.015em] transition-colors mt-auto shadow-lg shadow-primary/25">
+                                        <button onClick={() => onOpenEnrollment()} className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-primary hover:bg-primary-dark text-white text-sm font-bold leading-normal tracking-[0.015em] transition-colors mt-auto shadow-lg shadow-primary/25">
                                             <span className="truncate">{content.card2_btn}</span>
                                         </button>
                                     </div>
@@ -1021,7 +1187,7 @@
                                                 </p>
                                             </div>
                                         </div>
-                                        <button className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-[#282e39] hover:bg-[#343b49] text-white text-sm font-bold leading-normal tracking-[0.015em] transition-colors mt-auto">
+                                        <button onClick={() => onOpenEnrollment()} className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-[#282e39] hover:bg-[#343b49] text-white text-sm font-bold leading-normal tracking-[0.015em] transition-colors mt-auto">
                                             <span className="truncate">{content.card3_btn}</span>
                                         </button>
                                     </div>
@@ -1059,7 +1225,7 @@
                                         </p>
                                     </div>
                                     <div className="flex justify-center z-10 w-full md:w-auto">
-                                        <button className="flex min-w-[200px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-8 bg-primary hover:bg-primary-dark text-white text-base font-bold leading-normal tracking-[0.015em] transition-all shadow-lg hover:shadow-primary/50">
+                                        <button onClick={() => onOpenEnrollment()} className="flex min-w-[200px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-8 bg-primary hover:bg-primary-dark text-white text-base font-bold leading-normal tracking-[0.015em] transition-all shadow-lg hover:shadow-primary/50">
                                             <span className="truncate">{content.cta_btn}</span>
                                         </button>
                                     </div>
@@ -1188,18 +1354,20 @@
         // --- Main App Component ---
         const App = () => {
             const [lang, setLang] = useState('es');
+            const [isModalOpen, setIsModalOpen] = useState(false);
             const toggleLang = () => setLang(l => l === 'es' ? 'en' : 'es');
 
             return (
                 <LanguageContext.Provider value={{ lang, toggleLang }}>
                     <div className="min-h-screen">
-                        <div id="home"><HomePage /></div>
+                        <div id="home"><HomePage onOpenEnrollment={() => setIsModalOpen(true)} /></div>
                         <div id="revelation"><RevelationPage /></div>
                         <div id="target"><TargetPage /></div>
-                        <div id="program"><ProgramPage /></div>
-                        <div id="pricing"><PricingPage /></div>
+                        <div id="program"><ProgramPage onOpenEnrollment={() => setIsModalOpen(true)} /></div>
+                        <div id="pricing"><PricingPage onOpenEnrollment={() => setIsModalOpen(true)} /></div>
                         <div id="mentors"><MentorsPage /></div>
                         <Navigation />
+                        <EnrollmentModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
                         {/* Container for n8n Chatbot */}
                         <div id="n8n-chat"></div>
                     </div>
