@@ -190,6 +190,22 @@
         .n8n-chat .chat-input::placeholder {
             color: #94a3b8 !important;
         }
+
+        /* Mobile adjustments for n8n chat position */
+        @media (max-width: 768px) {
+            .n8n-chat {
+                bottom: 90px !important;
+                /* Move it above the app-nav */
+                right: 20px !important;
+                z-index: 9998 !important;
+                /* Just below modal but above content */
+            }
+
+            /* If the library uses a specific class for the button */
+            .n8n-chat-button {
+                bottom: 90px !important;
+            }
+        }
     </style>
 </head>
 
@@ -198,7 +214,7 @@
     <div id="root"></div>
 
     <script type="module">
-        import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.js';
+        import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
 
         // Initialize n8n Chatbot with specific theming
         createChat({
